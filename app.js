@@ -1,56 +1,76 @@
 
-// Constructor to create search box
-function searchControl(controlDiv, map){
+var addSearchBox = function () {
+    var box = "<input id=\"p2\" class=\"controls\" type=\"text\" placeholder=\"Enter a location\">";
+    $('#searchBoxes').append(box);
 
-    // Set CSS for the control border.
-    var controlUI = document.createElement('div');
-    controlUI.style.backgroundColor = '#fff';
-    controlUI.style.border = '2px solid #fff';
-    controlUI.style.borderRadius = '3px';
-    controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-    controlUI.style.cursor = 'pointer';
-    controlUI.style.marginBottom = '22px';
-    controlUI.style.textAlign = 'center';
-    controlUI.title = 'Click to recenter the map';
-    controlDiv.appendChild(controlUI);
+    var input = /** @type {!HTMLInputElement} */(
+        document.getElementById('p2'));
 
-    // Set CSS for the control interior.
-    var controlText = document.createElement('div');
-    controlText.style.color = 'rgb(25,25,25)';
-    controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-    controlText.style.fontSize = '16px';
-    controlText.style.lineHeight = '38px';
-    controlText.style.paddingLeft = '5px';
-    controlText.style.paddingRight = '5px';
-    controlText.innerHTML = 'Center Map';
-    controlUI.appendChild(controlText);
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+}
 
-    // Setup the click event listeners: simply set the map to Chicago.
-    controlUI.addEventListener('click', function() {
-        map.setCenter(chicago);
+function initMap() {
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: -33.8688, lng: 151.2195},
+        zoom: 13,
+        mapTypeControl: false,
+        streetViewControl: false
     });
+    var input = /** @type {!HTMLInputElement} */(
+        document.getElementById('p1'));
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    var autocomplete1 = new google.maps.places.Autocomplete(input);
+    autocomplete1.bindTo('bounds', map);
+
+    var infowindow = new google.maps.InfoWindow();
+    var marker = new google.maps.Marker({
+        map: map,
+        anchorPoint: new google.maps.Point(0, -29)
+    });
+
+    autocomplete1.addListener('place_changed', function() {
+        infowindow.close();
+        marker.setVisible(false);
+        var place = autocomplete1.getPlace();
+        if (!place.geometry) {
+            window.alert("Autocomplete's returned place contains no geometry");
+            return;
+        }
+
+        // If the place has a geometry, then present it on a map.
+        if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+        } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+        }
+        marker.setIcon(/** @type {google.maps.Icon} */({
+            url: place.icon,
+            size: new google.maps.Size(71, 71),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(35, 35)
+        }));
+        marker.setPosition(place.geometry.location);
+        marker.setVisible(true);
+
+        var address = '';
+        if (place.address_components) {
+            address = [
+                (place.address_components[0] && place.address_components[0].short_name || ''),
+                (place.address_components[1] && place.address_components[1].short_name || ''),
+                (place.address_components[2] && place.address_components[2].short_name || '')
+            ].join(' ');
+        }
+
+        infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+        infowindow.open(map, marker);
+    });
+
+
+   //addSearchBox();
+
 }
-
-var map;
-var chicago = {lat: 41.85, lng: -87.65};
-var initMap = function () {
-    // Creating map
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: chicago,
-            zoom: 8,
-            mapTypeControl: false,
-            streetViewControl: false
-        });
-
-    // Create the DIV to hold the control and call the searchControl()
-    // constructor passing in this DIV.
-    var centerControlDiv = document.createElement('div');
-    var centerControl = new searchControl(centerControlDiv, map);
-
-    centerControlDiv.index = 1;
-    // Adding search control to map
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv);
-}
-
 
 $(document).ready(initMap);
