@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Find a Tims in the middle!</title>
-    <meta name="viewport" content="initial-scale=1.0">
+    <title>Timmies in the middle!</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <link rel="stylesheet" href="styles.css">
-    <! -- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAcWArnjxMljCGAUw1ES5d-z1fh6bth1TQ&callback=initMap&libraries=places" async defer></script>
-    <script src="app.js"></script>
 </head>
 <body>
-    <div class="inputs">
+<div id="searchBoxes">
+    <input id="p1" class="controls" type="text" placeholder="Enter a location">
+</div>
 
-    </div>
+<div id="map"></div>
 
-    <div id="map"></div>
+<link rel="stylesheet" href="styles.css">
+<script src="app.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAcWArnjxMljCGAUw1ES5d-z1fh6bth1TQ&libraries=places&callback=initMap"
+        async defer></script>
 </body>
 </html>
-
-
