@@ -20,7 +20,7 @@ function initMap() {
     });
 
 
-    // Try HTML5 geolocation.
+    // HTML5 geolocation.
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             var pos = {
@@ -37,6 +37,9 @@ function initMap() {
         handleLocationError(false, infoWindow, map.getCenter());
     }
 
+
+    var locationArray = [[],[]];
+
     // Getting input from first search box
     var inputA = (document.getElementById('pointA'));
     var autocompleteA = new google.maps.places.Autocomplete(inputA);
@@ -47,29 +50,38 @@ function initMap() {
     var autocompleteB = new google.maps.places.Autocomplete(inputB);
     autocompleteB.bindTo('bounds', map);
 
+    /* Creating marker
     var infowindow = new google.maps.InfoWindow();
     var marker = new google.maps.Marker({
         map: map,
         anchorPoint: new google.maps.Point(0, -29)
     });
+    */
+
+    var infowindow = new google.maps.InfoWindow();
+    var marker, i;
 
     autocompleteA.addListener('place_changed', function() {
-        infowindow.close();
-        marker.setVisible(false);
         var place = autocompleteA.getPlace();
-        if (!place.geometry) {
-            window.alert("Autocomplete's returned place contains no geometry");
-            return;
-        }
+        locationArray[0].push(place.geometry.location.lat(),place.geometry.location.lng());
+        console.log(locationArray[0]);
+        console.log(locationArray[0].length);
+    });
 
+    autocompleteB.addListener('place_changed', function() {
+        var place1 = autocompleteB.getPlace();
+        locationArray[1].push(place1.geometry.location.lat(),place1.geometry.location.lng());
+        console.log(locationArray[1]);
+        console.log(locationArray.length);
+    });
 
-        // If the place has a geometry, then present it on a map.
-        if (place.geometry.viewport) {
-            map.fitBounds(place.geometry.viewport);
-        } else {
-            map.setCenter(place.geometry.location);
-            map.setZoom(17);  // Why 17? Because it looks good.
-        }
+    for (i = 0; i < locationArray.length; i++){
+
+        marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locationArray[i][0], locationArray[i][1]),
+            map: map
+        });
+
         marker.setIcon(/** @type {google.maps.Icon} */({
             url: place.icon,
             size: new google.maps.Size(71, 71),
@@ -77,7 +89,8 @@ function initMap() {
             anchor: new google.maps.Point(17, 34),
             scaledSize: new google.maps.Size(35, 35)
         }));
-        marker.setPosition(place.geometry.location);
+
+       // marker.setPosition(place.geometry.location);         // fix this shit
         marker.setVisible(true);
 
         var address = '';
@@ -91,7 +104,7 @@ function initMap() {
 
         infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
         infowindow.open(map, marker);
-    });
+    }
 
 }
 
@@ -101,11 +114,6 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
         'Error: The Geolocation service failed.' :
         'Error: Your browser doesn\'t support geolocation.');
 }
-
-
-
-
-
 
 
 $(document).ready(initMap);
