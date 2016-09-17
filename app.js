@@ -10,16 +10,42 @@ var addSearchBox = function () {
 */
 
 function initMap() {
+
     var map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: -33.8688, lng: 151.2195},
-        zoom: 13,
+        center: {lat: -34.397, lng: 150.644},
+        zoom: 8,
         mapTypeControl: false,
-        streetViewControl: false
+        streetViewControl: false,
+        scrollwheel: false
     });
 
-    var input = (document.getElementById('pointA'));
-    var autocomplete1 = new google.maps.places.Autocomplete(input);
-    autocomplete1.bindTo('bounds', map);
+
+    // Try HTML5 geolocation.
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            map.setCenter(pos);
+        }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
+        });
+    } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+    }
+
+    // Getting input from first search box
+    var inputA = (document.getElementById('pointA'));
+    var autocompleteA = new google.maps.places.Autocomplete(inputA);
+    autocompleteA.bindTo('bounds', map);
+
+    // Getting input from second search box
+    var inputB = (document.getElementById('pointB'));
+    var autocompleteB = new google.maps.places.Autocomplete(inputB);
+    autocompleteB.bindTo('bounds', map);
 
     var infowindow = new google.maps.InfoWindow();
     var marker = new google.maps.Marker({
@@ -27,14 +53,15 @@ function initMap() {
         anchorPoint: new google.maps.Point(0, -29)
     });
 
-    autocomplete1.addListener('place_changed', function() {
+    autocompleteA.addListener('place_changed', function() {
         infowindow.close();
         marker.setVisible(false);
-        var place = autocomplete1.getPlace();
+        var place = autocompleteA.getPlace();
         if (!place.geometry) {
             window.alert("Autocomplete's returned place contains no geometry");
             return;
         }
+
 
         // If the place has a geometry, then present it on a map.
         if (place.geometry.viewport) {
@@ -67,5 +94,18 @@ function initMap() {
     });
 
 }
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(browserHasGeolocation ?
+        'Error: The Geolocation service failed.' :
+        'Error: Your browser doesn\'t support geolocation.');
+}
+
+
+
+
+
+
 
 $(document).ready(initMap);
