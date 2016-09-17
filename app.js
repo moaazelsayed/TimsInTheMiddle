@@ -1,13 +1,13 @@
-
+/*
 var addSearchBox = function () {
-    var box = "<input id=\"p2\" class=\"controls\" type=\"text\" placeholder=\"Enter a location\">";
+
+
+    var box = "<input>";
     $('#searchBoxes').append(box);
 
-    var input = /** @type {!HTMLInputElement} */(
-        document.getElementById('p2'));
-
-    map.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
 }
+
+*/
 
 function initMap() {
     var map = new google.maps.Map(document.getElementById('map'), {
@@ -16,10 +16,8 @@ function initMap() {
         mapTypeControl: false,
         streetViewControl: false
     });
-    var input = /** @type {!HTMLInputElement} */(
-        document.getElementById('p1'));
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
+    var input = (document.getElementById('pointA'));
     var autocomplete1 = new google.maps.places.Autocomplete(input);
     autocomplete1.bindTo('bounds', map);
 
@@ -67,9 +65,6 @@ function initMap() {
         infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
         infowindow.open(map, marker);
     });
-
-
-   //addSearchBox();
 
 }
 
