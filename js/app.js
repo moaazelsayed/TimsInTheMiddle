@@ -1,47 +1,19 @@
-/*
-var addSearchBox = function () {
 
-
-    var box = "<input>";
-    $('#searchBoxes').append(box);
-
-}
-
-*/
-var counter = 2;
-var locationArray = [];
-var autoCompleteArray = [];
-
-function addInput(divName){
-  var newdiv = document.createElement('div');
-  newdiv.id = ("d" + counter);
-  newdiv.innerHTML = "<input id='point" + counter + "' class='controls' type='text' placeholder='Enter a location'>";
-  document.getElementById(divName).appendChild(newdiv);
-  counter++;
-  this.initMap();;
-}
-function minusInput(divName){
-    if(2 < counter) {
-        document.getElementById(divName).removeChild(document.getElementById('d' + (counter - 1)));
-        counter--;
-        this.initMap();;
-    } else {
-        alert("Cannot find midpoint of a single location");
-    }
-}
 
 var map;
 var markerArr = [];
+var glat, glng;
 
 function initMap() {
 
     map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: -34.397, lng: 150.644},
+        center: {lat: 43.472293, lng: -80.545072},
         zoom: 10,
         mapTypeControl: false,
-        streetViewControl: false,
+        streetViewControl: true,
         scrollwheel: false
     });
+
 
     // HTML5 geolocation.
     if (navigator.geolocation) {
@@ -60,29 +32,41 @@ function initMap() {
         handleLocationError(false, infoWindow, map.getCenter());
     }
 
-    for (var i = 0; i < counter; i++) {
-        var input = (document.getElementById('point' + i));
-        var autoComplete = new google.maps.places.Autocomplete(input);
-        autoComplete.bindTo('bounds', map);
-        autoCompleteArray.push(autoComplete);
-    }
+
+    var locationArray = [];
+
+    // Getting input from first search box
+    var inputA = (document.getElementById('pointA'));
+    var autocompleteA = new google.maps.places.Autocomplete(inputA);
+    autocompleteA.bindTo('bounds', map);
+
+    // Getting input from second search box
+    var inputB = (document.getElementById('pointB'));
+    var autocompleteB = new google.maps.places.Autocomplete(inputB);
+    autocompleteB.bindTo('bounds', map);
 
     var infowindow = new google.maps.InfoWindow();
+    var i;
 
-    for (var a = 0; a < autoCompleteArray.length; a++){
-        
-        var placeObject = autoCompleteArray[a];
+    autocompleteA.addListener('place_changed', function() {
+        var place = autocompleteA.getPlace();
+        locationArray.push([place.geometry.location.lat(),place.geometry.location.lng()]);
+        console.log(locationArray[0]);
+        console.log(locationArray[0].length);
+        paint(place, locationArray);
+    });
 
-            placeObject.addListener('place_changed', function() {
-            var place = this.getPlace();
-
-            locationArray.push([place.geometry.location.lat(),place.geometry.location.lng()]);
-            paint (place, locationArray);
-        });
-    }
+    autocompleteB.addListener('place_changed', function() {
+        var place = autocompleteB.getPlace();
+        locationArray.push([place.geometry.location.lat(),place.geometry.location.lng()]);
+        console.log(locationArray[1]);
+        console.log(locationArray[1].length);
+        paint(place, locationArray);
+    });
 
     function paint(place, locationArray){
-        for (var i = 0; i < locationArray.length; i++){
+        console.log(locationArray.length);
+        for (i = 0; i < locationArray.length; i++){
 
             var marker = new google.maps.Marker({
                 position: new google.maps.LatLng(locationArray[i][0], locationArray[i][1]),
@@ -99,7 +83,8 @@ function initMap() {
                 scaledSize: new google.maps.Size(35, 35)
             }));
 
-            marker.setVisible(true);
+            // marker.setPosition(place.geometry.location);         // fix this shit
+           // marker.setVisible(true);
 
             var address = '';
             if (place.address_components) {
@@ -116,54 +101,21 @@ function initMap() {
     }
 
     function findMidPoint(locationArray) {
-
-        var currLatMid;
-        var currLngMid;
-
-        var mid = [];
-
-        for (var x = 0; x < (counter - 1); x++) {
-            var lat1;
-            var lat2;
-            var lng1;
-            var lng2;
-
-            if (x <= 0) {
-                lat1 = locationArray[x][0];
-                lat2 = locationArray[(x+1)][0];
-
-                lng1 = locationArray[x][1];
-                lng2 = locationArray[(x+1)][1];
-
-                mid[0] = (lat1 + lat2) / 2;
-                mid[1] = (lng1 + lng2) / 2;
-            } 
-            if (x > 0) {
-                lat2 = locationArray[(x+1)][0];
-                lng2 = locationArray[(x+1)][1];
-
-                mid[0] = (currLatMid + lat2) / 2;
-                mid[1] = (currLngMid + lng2) / 2;
-               
-            }
-            currLatMid = mid[0];
-            currLngMid = mid[1];
-        }
-
-        var finalMid = [];
-        finalMid[0] = currLatMid;
-        finalMid[1] = currLngMid;
-
-/*      var lat1 = locationArray[0][0];
+        var lat1 = locationArray[0][0];
         var lat2 = locationArray[1][0];
 
         var lng1 = locationArray[0][1];
         var lng2 = locationArray[1][1];
 
-        mid[0] = (lat1 + lat2) / 2;
-        mid[1] = (lng1 + lng2) / 2;*/
+        var mid = [];
 
-       return finalMid;
+        mid[0] = (lat1 + lat2) / 2;
+        mid[1] = (lng1 + lng2) / 2;
+
+        console.log("Mid lat = " + mid[0]);
+        console.log("Mid Lng = " + mid[1]);
+
+       return mid;
     }
 
 
@@ -173,17 +125,20 @@ function initMap() {
 
         locationArray = [];
 
+
+
     });
+
 }
 
 function findTims(mid) {
     console.log(mid[0]);
     console.log(mid[1]);
     var bounds = new google.maps.LatLng(mid[0],mid[1]);
+
     var request = {
         location: bounds,
-        types: ['cafe'],
-        keyword: 'Tim Horton',
+        keyword: ['tim hortons'],
         rankBy: google.maps.places.RankBy.DISTANCE
     };
 
@@ -191,11 +146,20 @@ function findTims(mid) {
     service.nearbySearch(request, callback);
 
     function callback(results, status) {
-        var lat = results[0].geometry.location.lat();
-        var lng = results[0].geometry.location.lng();
-        console.log(lat);
-        console.log(lng);
-        paintTims(lat, lng);
+
+
+        if (results.length==0){
+            console.log("No shop around!");
+            alert("No Tim Horton shops around!");
+        }
+
+        console.log(results);
+        glat = results[0].geometry.location.lat();
+        glng = results[0].geometry.location.lng();
+
+        console.log("Tim lat = " + glat);
+        console.log("Tim Lng = " + glng);
+        paintTims(glat, glng);
 
     }
 
@@ -203,9 +167,13 @@ function findTims(mid) {
 
 
 function paintTims(lat, lng) {
+
+
+
     var marker = new google.maps.Marker({
         position: new google.maps.LatLng(lat, lng),
-        map: map
+        map: map,
+        icon: 'http://i.imgur.com/L3uPOwE.png'
     });
 
     marker.setIcon(({
@@ -214,9 +182,16 @@ function paintTims(lat, lng) {
         anchor: new google.maps.Point(17, 34),
         scaledSize: new google.maps.Size(35, 35)
     }));
-    marker.setVisible(true);
-}
 
+    marker.setVisible(true);
+
+    var bounds = new google.maps.LatLng(lat,lng);
+    map.setCenter(bounds);
+   // $('#searchBoxes').append("<a href=\"http://maps.google.com/?ie=UTF8&hq=&ll="+lat+","+lng+"&z=13\" + target=\"_blank\"><button class=\"btn btn-success directionButton\" type=\"button\">Directions</button></a>");
+    $('#searchBoxes').append("<a href=\"http://maps.google.com/maps?q="+lat+","+lng+"&ll="+lat+0.1+","+lng+0.1+"&z=17\"+ target=\"_blank\"><button class=\"btn btn-success directionButton\" type=\"button\">Directions</button></a>")
+
+    h
+}
 
 
 
@@ -226,7 +201,6 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
         'Error: The Geolocation service failed.' :
         'Error: Your browser doesn\'t support geolocation.');
 }
-
 
 
 $(document).ready(initMap);
