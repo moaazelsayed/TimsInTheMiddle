@@ -4,7 +4,7 @@ html, body {
     padding: 0;
 }
 #map {
-    height: 70%;
+    height: 90%;
     margin-top: 20px;
 }
 .controls {
@@ -31,6 +31,20 @@ html, body {
 
 .controls:focus {
     border-color: brown;
+}
+
+#findButton {
+    margin-left: 10px;
+}
+
+.title {
+    font-family: 'Lobster', cursive;
+    color: brown;
+}
+
+.directionButton {
+    margin-left: 40px;
+    margin-right: 0px;
 }
 
 
