@@ -8,8 +8,11 @@ var addSearchBox = function () {
 }
 
 */
+var map;
+var markerArr = [];
 var counter = 2;
-var locationArray = [];
+var latArray = [];
+var lngArray = [];
 var autoCompleteArray = [];
 
 function addInput(divName){
@@ -29,9 +32,6 @@ function minusInput(divName){
         alert("Cannot find midpoint of a single location");
     }
 }
-
-var map;
-var markerArr = [];
 
 function initMap() {
 
@@ -76,109 +76,128 @@ function initMap() {
             placeObject.addListener('place_changed', function() {
             var place = this.getPlace();
 
-            locationArray.push([place.geometry.location.lat(),place.geometry.location.lng()]);
-            paint (place, locationArray);
+            latArray.push(place.geometry.location.lat());
+            lngArray.push(place.geometry.location.lng());
+
+            paint (place, place.geometry.location.lat(), place.geometry.location.lng());
         });
     }
 
-    function paint(place, locationArray){
-        for (var i = 0; i < locationArray.length; i++){
+    function paint(place, lat, lng){
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, lng),
+            map: map
+        });
 
-            var marker = new google.maps.Marker({
-                position: new google.maps.LatLng(locationArray[i][0], locationArray[i][1]),
-                map: map
-            });
+        markerArr.push(marker);
 
-            markerArr.push(marker);
+        marker.setIcon(/** @type {google.maps.Icon} */({
+            url: place.icon,
+            size: new google.maps.Size(71, 71),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(35, 35)
+        }));
 
-            marker.setIcon(/** @type {google.maps.Icon} */({
-                url: place.icon,
-                size: new google.maps.Size(71, 71),
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(17, 34),
-                scaledSize: new google.maps.Size(35, 35)
-            }));
+        marker.setVisible(true);
 
-            marker.setVisible(true);
-
-            var address = '';
-            if (place.address_components) {
-                address = [
-                    (place.address_components[0] && place.address_components[0].short_name || ''),
-                    (place.address_components[1] && place.address_components[1].short_name || ''),
-                    (place.address_components[2] && place.address_components[2].short_name || '')
-                ].join(' ');
-            }
-
-            infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
-            infowindow.open(map, marker);
+        var address = '';
+        if (place.address_components) {
+            address = [
+                (place.address_components[0] && place.address_components[0].short_name || ''),
+                (place.address_components[1] && place.address_components[1].short_name || ''),
+                (place.address_components[2] && place.address_components[2].short_name || '')
+            ].join(' ');
         }
+
+        infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+        infowindow.open(map, marker);
     }
 
-    function findMidPoint(locationArray) {
+    function findMidPoint(latArr, lngArr) {
 
-        var currLatMid;
-        var currLngMid;
+        var currLatMid = 0;
+        var currLngMid = 0;
 
         var mid = [];
 
-        for (var x = 0; x < (counter - 1); x++) {
-            var lat1;
-            var lat2;
-            var lng1;
-            var lng2;
+        console.log(latArr,lngArr);
 
-            if (x <= 0) {
-                lat1 = locationArray[x][0];
-                lat2 = locationArray[(x+1)][0];
-
-                lng1 = locationArray[x][1];
-                lng2 = locationArray[(x+1)][1];
-
-                mid[0] = (lat1 + lat2) / 2;
-                mid[1] = (lng1 + lng2) / 2;
-            } 
-            if (x > 0) {
-                lat2 = locationArray[(x+1)][0];
-                lng2 = locationArray[(x+1)][1];
-
-                mid[0] = (currLatMid + lat2) / 2;
-                mid[1] = (currLngMid + lng2) / 2;
-               
-            }
-            currLatMid = mid[0];
-            currLngMid = mid[1];
+        for (var x = 0; x < counter; x++) {
+            console.log(latArr[x],lngArr[x]);
+            currLatMid = currLatMid + latArr[x];
+            currLngMid = currLngMid + lngArr[x];
         }
 
         var finalMid = [];
-        finalMid[0] = currLatMid;
-        finalMid[1] = currLngMid;
+        finalMid.push(currLatMid/latArr.length);
+        finalMid.push(currLngMid/lngArr.length);
 
-/*      var lat1 = locationArray[0][0];
-        var lat2 = locationArray[1][0];
+        console.log(finalMid);
 
-        var lng1 = locationArray[0][1];
-        var lng2 = locationArray[1][1];
-
-        mid[0] = (lat1 + lat2) / 2;
-        mid[1] = (lng1 + lng2) / 2;*/
 
        return finalMid;
     }
 
+    // function findMidPoint(latArr, lngArr) {
+
+    //     var currLatMid;
+    //     var currLngMid;
+
+    //     var mid = [];
+
+    //     for (var x = 0; x < counter; x++) {
+    //         var lat1;
+    //         var lat2;
+    //         var lng1;
+    //         var lng2;
+
+    //         console.log(latArr[x], lngArr[x]);
+
+    //         if (x <= 0) {
+    //             lat1 = latArr[x];
+    //             lat2 = latArr[(x+1)];
+
+    //             lng1 = lngArr[x];
+    //             lng2 = lngArr[(x+1)];
+
+    //             mid[0] = (lat1 + lat2) / 2;
+    //             mid[1] = (lng1 + lng2) / 2;
+    //         } 
+    //         if (x > 0) {
+    //             lat2 = latArr[(x+1)];
+    //             lng2 = lngArr[(x+1)];
+
+    //             mid[0] = (currLatMid + lat2) / 2;
+    //             mid[1] = (currLngMid + lng2) / 2;
+               
+    //         }
+    //         currLatMid = mid[0];
+    //         currLngMid = mid[1];
+    //     }
+
+    //     var finalMid = [];
+    //     finalMid.push(currLatMid);
+    //     finalMid.push(currLngMid);
+
+    //     console.log(finalMid);
+
+
+    //    return finalMid;
+    // }
+
 
     $("#findButton").click(function(){
-        var mid = findMidPoint(locationArray);
+        var mid = findMidPoint(latArray, lngArray);
         findTims(mid);
 
-        locationArray = [];
+    //latArray = [];
+    //lngArray = [];
 
     });
 }
 
 function findTims(mid) {
-    console.log(mid[0]);
-    console.log(mid[1]);
     var bounds = new google.maps.LatLng(mid[0],mid[1]);
     var request = {
         location: bounds,
@@ -193,8 +212,7 @@ function findTims(mid) {
     function callback(results, status) {
         var lat = results[0].geometry.location.lat();
         var lng = results[0].geometry.location.lng();
-        console.log(lat);
-        console.log(lng);
+
         paintTims(lat, lng);
 
     }
