@@ -25,3 +25,5 @@ The Google Maps API that we used did not have the capability to find Tim Horton'
 * Mobile application
 * Expanding to restaurants/cafes other than just Tim Horton's
 * Expanding internationally to new regions
+
+## Test it here -> https://zaidkaleem.github.io/TimsInTheMiddle
